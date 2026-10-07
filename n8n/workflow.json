@@ -1,0 +1,252 @@
+{
+  "name": "workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "clientes",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -528,
+        -80
+      ],
+      "id": "92387833-7d3f-47cf-8f6b-18b9fa250a2e",
+      "name": "Webhook",
+      "webhookId": "22950bd8-18be-4e67-9cc7-ae71941fe9d4"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{$json}}",
+        "options": {
+          "responseCode": 200
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1424,
+        -224
+      ],
+      "id": "e04bff70-1976-4494-9301-bdd0235e98c8",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "url": "https://digitalinnovationone.github.io/dio-lab-assistente-investimentos-rpa-n8n/data.csv",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -64,
+        80
+      ],
+      "id": "bc4fc02b-56bb-47e3-b2ce-29554e68b033",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Pega o CSV como texto vindo do HTTP Request\nconst csvRaw = $json.data ?? $json.body ?? $json;\nconst text = (typeof csvRaw === \"string\") ? csvRaw : JSON.stringify(csvRaw);\n\nconst lines = text.split(/\\r?\\n/).map(l => l.trim()).filter(Boolean);\nconst headers = lines[0].split(\",\").map(h => h.trim());\n\nconst investimentos = lines.slice(1).map(line => {\n  const cols = line.split(\",\").map(c => c.trim());\n  const obj = {};\n  headers.forEach((h, i) => obj[h] = cols[i] ?? \"\");\n\n  // normaliza mínimo para número\n  obj.minimo = Number(String(obj.minimo).replace(/[^\\d]/g, \"\")) || 0;\n\n  return obj;\n});\n\nreturn [{ json: { investimentos } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        80
+      ],
+      "id": "beac924c-54bb-450d-98ed-5fe777fbaf9c",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        704,
+        -224
+      ],
+      "id": "068fce5b-1ecd-4c4c-91dc-a933be9bb7d7",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Função para formatar valores em moeda local\nfunction formatCurrency(value) {\n  return \"R$ \" + value.toLocaleString(\"pt-BR\", {minimumFractionDigits: 2});\n}\n\n// Dados dos investimentos\nconst investimentos = $input.first().json.investimentos;\n\n// Dados dos clientes\nconst clientes = $input.first().json.body.clientes;\n\n// Processamento\nconst resultados = clientes.map(cliente => {\n  const saldo_num = parseFloat(\n    cliente.saldo.replace(\"R$\", \"\").replace(/\\./g, \"\").replace(\",\", \".\")\n  );\n\n  const produtosPerfil = investimentos.filter(inv => inv.perfil === cliente.perfil);\n  const produtoEscolhido = produtosPerfil\n    .filter(p => saldo_num >= p.minimo)\n    .sort((a, b) => b.minimo - a.minimo)[0];\n\n  if (!produtoEscolhido) {\n    return {\n      nome: cliente.nome,\n      email: cliente.email,\n      perfil: cliente.perfil,\n      saldo_texto: cliente.saldo,\n      saldo_num,\n      motivo: \"saldo_insuficiente\",\n      mensagem_escolhida: `Olá ${cliente.nome}, infelizmente seu saldo atual (${cliente.saldo}) não permite investir nos produtos disponíveis para seu perfil (${cliente.perfil}).`\n    };\n  }\n\n  const minimoFormatado = formatCurrency(produtoEscolhido.minimo);\n  const rentabilidade = produtoEscolhido.rentabilidade;\n\n  const perfilNormalizado = cliente.perfil.toLowerCase();\n\n  const mensagens = {\n    conservador: `Olá ${cliente.nome}! Como seu perfil é (${cliente.perfil}), o foco é a segurança do seu patrimônio. Indicamos o produto **${produtoEscolhido.produto}** (mínimo ${minimoFormatado}) em renda fixa para rentabilizar com proteção. Com seu saldo atual (${cliente.saldo}), você já pode começar. Rentabilidade esperada: ${rentabilidade}.`,\n\n    moderado: `Olá ${cliente.nome}! Para o seu perfil (${cliente.perfil}), buscamos o equilíbrio ideal entre renda fixa e variável. Uma excelente oportunidade é o **${produtoEscolhido.produto}** (mínimo ${minimoFormatado}), combinando segurança e retorno. Seu saldo atual (${cliente.saldo}) permite aplicar agora mesmo. Rentabilidade: ${rentabilidade}.`,\n\n    arrojado: `Olá ${cliente.nome}! Sendo seu perfil (${cliente.perfil}), o objetivo é potencializar seus ganhos com foco em ações e renda variável. Sugerimos o produto **${produtoEscolhido.produto}** (mínimo ${minimoFormatado}) para buscar maior retorno. Com o seu saldo atual (${cliente.saldo}), você já está pronto para investir. Rentabilidade: ${rentabilidade}.`\n  };\n\n  const mensagem_escolhida = mensagens[perfilNormalizado];\n\n  return {\n    nome: cliente.nome,\n    email: cliente.email,\n    perfil: cliente.perfil,\n    saldo_texto: cliente.saldo,\n    saldo_num,\n    recomendacao: {\n      perfil: produtoEscolhido.perfil,\n      produto: produtoEscolhido.produto,\n      minimo: produtoEscolhido.minimo,\n      rentabilidade\n    },\n    motivo: \"saldo_ok\",\n    mensagem_escolhida\n  };\n});\n\nreturn [{\n  json: {\n    ok: true,\n    total_clientes: resultados.length,\n    total_investimentos: investimentos.length,\n    resultados\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1072,
+        -224
+      ],
+      "id": "70ca6a86-38ad-4cd9-9441-a04cbc1b6136",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "content": "## Coleta de dados dos Clientes\nRecebe os dados enviados pelo Pyhton, extraídos de uma tabela disponibilizada em uma pagina HTML do Github Pages\n`\"https://digitalinnovationone.github.io/dio-lab-assistente-investimentos-rpa-n8n/\"`",
+        "height": 416,
+        "width": 288
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -624,
+        -320
+      ],
+      "typeVersion": 1,
+      "id": "805ba5c4-6625-4210-893a-d3d9de2d7f44",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "## Coleta de Perfis de Investimento\n\n\n\n\n\n\n\n\n\n\n\n\n\nRecupera os dados de uma tabela CSV do Github Pages contendo os perfis de investimento disponíveis\n`\"https://digitalinnovationone.github.io/dio-lab-assistente-investimentos-rpa-n8n/data.csv\"`",
+        "height": 400,
+        "width": 304,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -176,
+        -16
+      ],
+      "typeVersion": 1,
+      "id": "577a4901-be7f-48d3-8bd0-2788e4c0a1ec",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "## Limpeza e padronização dos dados da tabela de Investimentos\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "height": 304,
+        "width": 304,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        224,
+        -48
+      ],
+      "typeVersion": 1,
+      "id": "c783c15b-b95b-4997-9aa7-053af57415d9",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "## Combinação dos dados dos clientes e tipos de investimentos\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "height": 336,
+        "width": 304,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        608,
+        -368
+      ],
+      "typeVersion": 1,
+      "id": "8596db27-884d-4f84-8b14-93e20657faf1",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "## Recomendações de Investimentos\n\n\n\n\n\n\n\n\n\n\n\n\n",
+        "height": 336,
+        "width": 304,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        960,
+        -368
+      ],
+      "typeVersion": 1,
+      "id": "b4f0423c-a3ac-448f-94a5-5731becc317c",
+      "name": "Sticky Note4"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond to Webhook": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "5fbef0f7-2dde-451d-8947-b2a71e071b13",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "73d7c7c8fa00b03b2ad915b725829de60e517ca053a319041ea2d4f318e68b77"
+  },
+  "id": "W2cSyapXGa1qMURT",
+  "tags": []
+}
