@@ -14,9 +14,9 @@
         -528,
         -80
       ],
-      "id": "92387833-7d3f-47cf-8f6b-18b9fa250a2e",
+      "id": "835949c7-a43e-47e9-bdb6-497216448d72",
       "name": "Webhook",
-      "webhookId": "22950bd8-18be-4e67-9cc7-ae71941fe9d4"
+      "webhookId": "0a8274ee-1b05-44b8-94e7-74e7e0a41493"
     },
     {
       "parameters": {
@@ -29,10 +29,10 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.4,
       "position": [
-        1424,
-        -224
+        2688,
+        -144
       ],
-      "id": "e04bff70-1976-4494-9301-bdd0235e98c8",
+      "id": "a5ac7480-fb78-46e9-922c-f080b70a8b48",
       "name": "Respond to Webhook"
     },
     {
@@ -46,7 +46,7 @@
         -64,
         80
       ],
-      "id": "bc4fc02b-56bb-47e3-b2ce-29554e68b033",
+      "id": "bb171515-6596-44af-9f80-ee63cfe22db6",
       "name": "HTTP Request"
     },
     {
@@ -59,7 +59,7 @@
         320,
         80
       ],
-      "id": "beac924c-54bb-450d-98ed-5fe777fbaf9c",
+      "id": "b10cc8bd-df16-4526-9ec9-596c1e983c34",
       "name": "Code in JavaScript"
     },
     {
@@ -74,7 +74,7 @@
         704,
         -224
       ],
-      "id": "068fce5b-1ecd-4c4c-91dc-a933be9bb7d7",
+      "id": "dd0f9499-19c2-42c2-b819-10098bdd951a",
       "name": "Merge"
     },
     {
@@ -87,7 +87,7 @@
         1072,
         -224
       ],
-      "id": "70ca6a86-38ad-4cd9-9441-a04cbc1b6136",
+      "id": "efeb5b32-8d3c-4dcc-a879-8806dabe521b",
       "name": "Code in JavaScript1"
     },
     {
@@ -102,7 +102,7 @@
         -320
       ],
       "typeVersion": 1,
-      "id": "805ba5c4-6625-4210-893a-d3d9de2d7f44",
+      "id": "63ef530c-3326-4e7e-925c-35de1c04becc",
       "name": "Sticky Note"
     },
     {
@@ -118,7 +118,7 @@
         -16
       ],
       "typeVersion": 1,
-      "id": "577a4901-be7f-48d3-8bd0-2788e4c0a1ec",
+      "id": "6ff4b1da-20f4-4c28-ba9a-6a8237dcb067",
       "name": "Sticky Note1"
     },
     {
@@ -134,7 +134,7 @@
         -48
       ],
       "typeVersion": 1,
-      "id": "c783c15b-b95b-4997-9aa7-053af57415d9",
+      "id": "bfa00482-89ba-49e8-9e90-9535f1c1d64e",
       "name": "Sticky Note2"
     },
     {
@@ -150,7 +150,7 @@
         -368
       ],
       "typeVersion": 1,
-      "id": "8596db27-884d-4f84-8b14-93e20657faf1",
+      "id": "3f68c230-11eb-4c49-9ddd-2c9971b13860",
       "name": "Sticky Note3"
     },
     {
@@ -166,8 +166,151 @@
         -368
       ],
       "typeVersion": 1,
-      "id": "b4f0423c-a3ac-448f-94a5-5731becc317c",
+      "id": "66959099-3060-4c3b-bd57-abad24a1d6c1",
       "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Função auxiliar para converter valores monetários em formato BRL para Number\nfunction parseBRL(valor) {\n  if (typeof valor === 'number') return valor;\n  if (!valor) return 0;\n\n  // Remove R$, espaços e caracteres não numéricos exceto pontos e vírgulas\n  let limpo = String(valor).replace(/[^\\d.,-]/g, '').trim();\n\n  // Trata formato brasileiro (ex: 1.250,50 -> 1250.50)\n  if (limpo.includes(',') && limpo.includes('.')) {\n    limpo = limpo.replace(/\\./g, '').replace(',', '.');\n  } else if (limpo.includes(',')) {\n    limpo = limpo.replace(',', '.');\n  }\n\n  const numero = parseFloat(limpo);\n  return isNaN(numero) ? 0 : numero;\n}\n\n// Obtém o array de clientes do $json.resultados\nconst clientes = $json.resultados || [];\n\n// Mapeia e padroniza cada cliente\nconst resultadosFormatados = clientes.map(cliente => {\n  // Trata e converte o saldo\n  const saldoNum = (cliente.saldo_num !== undefined && cliente.saldo_num !== null)\n    ? Number(cliente.saldo_num)\n    : parseBRL(cliente.saldo_texto || cliente.saldo);\n\n  return {\n    json: {\n      email_to: String(cliente.email || '').trim(),\n      nome: String(cliente.nome || '').trim(),\n      perfil: cliente.perfil,\n      saldo_texto: cliente.saldo_texto,\n      saldo_num: saldoNum,\n      recomendacao: cliente.recomendacao,\n      motivo: cliente.motivo,\n      mensagem_base: cliente.mensagem_escolhida || cliente.mensagem || '',\n      copy_rules: {\n        idioma: \"pt-BR\",\n        tom: \"amigável e profissional\",\n        tamanho: \"curto (4-6 linhas)\",\n        evitar: [\"promessas de ganho\", \"garantias\", \"linguagem agressiva\"]\n      }\n    }\n  };\n});\n\nreturn resultadosFormatados;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        -224
+      ],
+      "id": "f2854cd0-9685-49d2-8ecf-574e7f897f48",
+      "name": "Code in JavaScript2"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "openai/gpt-oss-120b",
+          "mode": "list",
+          "cachedResultName": "OPENAI/GPT-OSS-120B"
+        },
+        "responses": {
+          "values": [
+            {
+              "content": "=Escreva um e-mail curto em pt-BR para o cliente abaixo, sem prometer ganhos e sem garantias.\n\nCliente:\n\nNome:{{ $json.nome }}\nPerfil:{{ $json.perfil }}\nSaldo: {{ $json.saldo_texto }}\n\nRecomendação:\n\nProduto:{{ $json.recomendacao.produto }}\nMínimo:{{ $json.recomendacao.minimo }}\nRentabilidade:{{ $json.recomendacao.rentabilidade }}\nMotivo:{{ $json.motivo }}\n\nMeus dados:\nNome: Edmundo Batista\nEmpresa: Super Invest Finanças\nTelefone: (21) 9999-9999\n\n\nRetorne APENAS JSON com:\n{\n\"email_to\":{{ $json.email_to }},\n\"subject\":\"...\",\n\"text_body\":\"...\",\n\"html_body\":\"...\"\n}"
+            }
+          ]
+        },
+        "builtInTools": {},
+        "options": {
+          "store": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 2,
+      "position": [
+        1632,
+        -224
+      ],
+      "id": "70903b7b-9760-48d5-877d-254637fe89e8",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "fgr92JofXmIWkPWh",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n  // Acessa o texto JSON dentro da estrutura correta\n  const aiResponse = item.json.output[0].content[0].text;\n\n  // Converte string JSON em objeto\n  const parsed = JSON.parse(aiResponse);\n\n  // Pega o e-mail do cliente (ajuste conforme seu fluxo)\n  const to = parsed.email_to || \"cliente@email.com\";\n\n  return {\n    json: {\n      ok: true,\n      to,\n      subject: parsed.subject,\n      text_body: parsed.text_body,\n      html_body: parsed.html_body\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1984,
+        -224
+      ],
+      "id": "e022bc3d-1ec2-44a3-8940-45bab06f79f1",
+      "name": "Code in JavaScript3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b8576758-cbdd-4313-9b1c-157973b8cdbb",
+              "leftValue": "={{ $json.to }}",
+              "rightValue": "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$",
+              "operator": {
+                "type": "string",
+                "operation": "regex"
+              }
+            },
+            {
+              "id": "cc58dcfb-2c3d-41cb-a8bf-a0911dac9ee8",
+              "leftValue": "={{ $json.ok }}",
+              "rightValue": "=false",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2336,
+        -224
+      ],
+      "id": "0dd3ce0e-902b-4fdc-b5a2-c4168c6429d2",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "content": "## Verifica se o email é válido",
+        "height": 256,
+        "width": 224,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2272,
+        -320
+      ],
+      "typeVersion": 1,
+      "id": "110fe80b-671d-49e5-9ed0-0620b8281997",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.to }}",
+        "subject": "={{ $json.subject }}",
+        "message": "={{ $json.html_body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2688,
+        -368
+      ],
+      "id": "b3ab1da4-4ff1-4ddd-a03a-845fe3ae4888",
+      "name": "Send a message",
+      "webhookId": "7db760f6-6b4f-4bc6-ad42-f2078465952a",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "SUHkH4nCY2jJ49nF",
+          "name": "Gmail account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -230,6 +373,57 @@
       "main": [
         [
           {
+            "node": "Code in JavaScript2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript2": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript3": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
             "node": "Respond to Webhook",
             "type": "main",
             "index": 0
@@ -242,11 +436,11 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "5fbef0f7-2dde-451d-8947-b2a71e071b13",
+  "versionId": "5d8f1ec6-89fb-4572-a8b6-584a2f4a2bcd",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "73d7c7c8fa00b03b2ad915b725829de60e517ca053a319041ea2d4f318e68b77"
   },
-  "id": "W2cSyapXGa1qMURT",
+  "id": "6BdHk0TEbdV7ChzE",
   "tags": []
 }
