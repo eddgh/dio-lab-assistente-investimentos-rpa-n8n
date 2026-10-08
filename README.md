@@ -127,14 +127,14 @@ Conecte o Agente de IA do N8N a um modelo como Gemini ou GPT para:
 - [x] Repositório forkado com o workflow N8N implementado
 - [x] Workflow N8N exportado (`n8n/workflow.json`) com mensagens estáticas
 - [x] Script de RPA integrado ao Webhook do N8N
-- [x] Print ou vídeo demonstrando o fluxo funcionando de ponta a ponta
+- [x] [Print ou vídeo demonstrando o fluxo funcionando de ponta a ponta](/img-mvp)
 
 ### Desafio Completo
 
 - [x] Todos os itens do MVP
 - [x] Integração com Agente de IA no N8N
 - [x] Mensagens geradas dinamicamente via LLM
-- [x] Documentação explicando as decisões técnicas
+- [x] [Documentação explicando as decisões técnicas](decisoes_tecnicas.md)
 
 ## Estrutura do Repositório
 
