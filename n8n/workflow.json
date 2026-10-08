@@ -291,6 +291,7 @@
     },
     {
       "parameters": {
+        "authentication": "serviceAccount",
         "sendTo": "={{ $json.to }}",
         "subject": "={{ $json.subject }}",
         "message": "={{ $json.html_body }}",
@@ -306,8 +307,8 @@
       "name": "Send a message",
       "webhookId": "7db760f6-6b4f-4bc6-ad42-f2078465952a",
       "credentials": {
-        "gmailOAuth2": {
-          "id": "SUHkH4nCY2jJ49nF",
+        "googleApi": {
+          "id": "XwkM2RuavU0QBoPb",
           "name": "Gmail account"
         }
       }
@@ -436,7 +437,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "5d8f1ec6-89fb-4572-a8b6-584a2f4a2bcd",
+  "versionId": "a2ef25d2-4e8d-45e3-b305-2581098cc704",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "73d7c7c8fa00b03b2ad915b725829de60e517ca053a319041ea2d4f318e68b77"

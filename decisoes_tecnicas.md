@@ -79,3 +79,8 @@ Decisão: manter os e‑mails fictícios até esta etapa e aplicar dupla valida�
 Como o boolean `ok` vem sempre como `true`, o resultado do IF é forçado para o **False Branch**, impedindo o envio real pelo Gmail.  
 
 ✅ Resultado: simulação completa do fluxo, mas sem risco de disparar e‑mails para domínios reais.
+
+---
+
+### 📌 Etapa *Gmail node - Alterado o modo de Autorização das Credenciais de OAuth para Service Account*  
+Decisão: substitui o uso de OAuth por Service Account, simplificando a renovação de credenciais do projeto, o que é mais adequado para processos que rodam em segundo plano.
